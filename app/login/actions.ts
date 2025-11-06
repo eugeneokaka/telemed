@@ -1,7 +1,33 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/utils/supabase/server";
 
+// ✅ LOGIN ACTION
+export async function login(formData: FormData) {
+  const supabase = await createClient();
+
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  if (!email || !password) {
+    return { error: "Email and password are required" };
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
+}
+
+// ✅ SIGNUP ACTION
 export async function signup(formData: FormData) {
   const supabase = await createClient();
 
@@ -13,7 +39,11 @@ export async function signup(formData: FormData) {
   const gender = formData.get("gender") as string;
   const role = formData.get("role") as string;
 
-  // ✅ Create user account
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters long" };
+  }
+
+  // Create Supabase auth user
   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
     email,
     password,
@@ -25,11 +55,11 @@ export async function signup(formData: FormData) {
 
   const user = signUpData.user;
   if (!user) {
-    return { error: "Failed to create user. Try again." };
+    return { error: "Something went wrong. Please try again." };
   }
 
-  // ✅ Insert into users table
-  const { error: insertError } = await supabase.from("users").insert([
+  // Insert metadata
+  const { data, error: insertError } = await supabase.from("users").insert([
     {
       id: user.id,
       first_name,
@@ -40,20 +70,22 @@ export async function signup(formData: FormData) {
       onboarded: false,
     },
   ]);
+  console.log(data);
 
   if (insertError) {
     return { error: insertError.message };
   }
 
-  // ✅ Auto login
-  const { error: loginError } = await supabase.auth.signInWithPassword({
+  // Auto login
+  const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
-  if (loginError) {
-    return { error: loginError.message };
+  if (signInError) {
+    return { error: signInError.message };
   }
 
+  revalidatePath("/", "layout");
   return { success: true };
 }
