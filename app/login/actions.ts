@@ -1,46 +1,59 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
 import { createClient } from "@/utils/supabase/server";
-
-export async function login(formData: FormData) {
-  const supabase = await createClient();
-
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
-
-  const { error } = await supabase.auth.signInWithPassword(data);
-
-  if (error) {
-    redirect("/error");
-  }
-
-  revalidatePath("/", "layout");
-  redirect("/");
-}
 
 export async function signup(formData: FormData) {
   const supabase = await createClient();
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
-  const data = {
-    email: formData.get("email") as string,
-    password: formData.get("password") as string,
-  };
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const first_name = formData.get("first_name") as string;
+  const last_name = formData.get("last_name") as string;
+  const age = Number(formData.get("age"));
+  const gender = formData.get("gender") as string;
+  const role = formData.get("role") as string;
 
-  const { error } = await supabase.auth.signUp(data);
+  // ✅ Create user account
+  const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
-  if (error) {
-    redirect("/error");
+  if (signUpError) {
+    return { error: signUpError.message };
   }
 
-  revalidatePath("/confrim-email", "layout");
-  redirect("/confrim-email");
+  const user = signUpData.user;
+  if (!user) {
+    return { error: "Failed to create user. Try again." };
+  }
+
+  // ✅ Insert into users table
+  const { error: insertError } = await supabase.from("users").insert([
+    {
+      id: user.id,
+      first_name,
+      last_name,
+      age,
+      gender,
+      role,
+      onboarded: false,
+    },
+  ]);
+
+  if (insertError) {
+    return { error: insertError.message };
+  }
+
+  // ✅ Auto login
+  const { error: loginError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (loginError) {
+    return { error: loginError.message };
+  }
+
+  return { success: true };
 }
