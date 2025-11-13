@@ -154,7 +154,7 @@ export default function LoginSignupPage() {
                 </div>
 
                 <div>
-                  {/* <Label>Role</Label>
+                  <Label>Role</Label>
                   <Select name="role" required>
                     <SelectTrigger>
                       <SelectValue placeholder="Select role" />
@@ -164,7 +164,7 @@ export default function LoginSignupPage() {
                       <SelectItem value="patient">Patient</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
-                  </Select> */}
+                  </Select>
                 </div>
 
                 <div>
