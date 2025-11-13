@@ -45,6 +45,13 @@ export default function Navbar() {
       <Link href="/bookings" className="hover:underline">
         Booking
       </Link>
+      <Link
+        href="/dashboard
+      "
+        className="hover:underline"
+      >
+        Dashboard
+      </Link>
     </>
   );
 
