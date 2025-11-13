@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // <-- import router
 import { createClient } from "@/utils/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -28,6 +29,7 @@ interface Prescription {
 
 export default function DashboardPage() {
   const supabase = createClient();
+  const router = useRouter(); // <-- router instance
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -36,7 +38,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchPrescriptions = async () => {
       setLoading(true);
-      // get current user
       const {
         data: { user },
         error: userError,
@@ -49,7 +50,6 @@ export default function DashboardPage() {
 
       setUserId(user.id);
 
-      // fetch role from users table
       const { data: userData, error: roleError } = await supabase
         .from("users")
         .select("role")
@@ -102,11 +102,23 @@ export default function DashboardPage() {
     fetchPrescriptions();
   }, []);
 
+  const handleCreatePrescription = () => {
+    router.push("/prescritions"); // <-- navigate to prescription page
+  };
+
   return (
     <div className="max-w-5xl mx-auto mt-10">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex justify-between items-center">
           <CardTitle>Dashboard</CardTitle>
+          {userRole === "doctor" && (
+            <button
+              onClick={handleCreatePrescription}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+            >
+              Create Prescription
+            </button>
+          )}
         </CardHeader>
         <CardContent>
           {loading ? (
