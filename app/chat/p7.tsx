@@ -65,10 +65,7 @@ export default function ChatPage() {
         if (!profile) throw new Error("User profile not found.");
         setUser(profile);
 
-        const { data: allUsers } = await supabase
-          .from("users")
-          .select("*")
-          .returns<User[]>();
+        const { data: allUsers } = await supabase.from("users").select("*");
         let filteredUsers: User[] = allUsers || [];
 
         // Only show doctors for patients, exclude self for doctors/admin
@@ -172,32 +169,26 @@ export default function ChatPage() {
     <div className="flex h-screen gap-6 p-6">
       {/* User List */}
       <div className="w-1/4 overflow-y-auto">
-        {userList.map((u) => {
-          // Show all users if logged-in user is a doctor
-          if (user?.role === "doctor" || u.role === "doctor") {
-            return (
-              <Card
-                key={u.id}
-                className="p-3 mb-2 cursor-pointer hover:shadow-md"
-                onClick={() => loadMessages(u)}
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar />
-                  <p>
-                    {u.role === "doctor" ? "Dr. " : ""}
-                    {u.first_name} {u.last_name}
-                  </p>
-                </div>
-              </Card>
-            );
-          }
-          return null;
-        })}
+        {userList.map((u) => (
+          <Card
+            key={u.id}
+            className="p-3 mb-2 cursor-pointer hover:shadow-md"
+            onClick={() => loadMessages(u)}
+          >
+            <div className="flex items-center gap-3">
+              <Avatar />
+              <p>
+                {u.role === "doctor" ? "Dr. " : ""}
+                {u.first_name} {u.last_name}
+              </p>
+            </div>
+          </Card>
+        ))}
       </div>
 
       {/* Chat Window */}
       <div className="flex-1 flex flex-col border rounded-lg p-4">
-        {selectedUser ? (
+        {selectedUser && user ? (
           <>
             <h2 className="mb-4 border-b pb-2 text-lg font-semibold">
               Chat with {selectedUser.role === "doctor" ? "Dr. " : ""}
@@ -207,9 +198,9 @@ export default function ChatPage() {
             <div className="flex-1 overflow-y-auto mb-4 space-y-2 px-2">
               {messages.map((msg) => {
                 const isOwnMessage =
-                  (user?.role === "patient" && msg.patientid === user?.id) ||
-                  (user?.role === "doctor" && msg.doctorid === user?.id) ||
-                  (user?.role !== "doctor" && msg.patientid === user?.id); // admin aligned like patient
+                  (user.role === "patient" && msg.patientid === user.id) ||
+                  (user.role === "doctor" && msg.doctorid === user.id) ||
+                  (user.role !== "doctor" && msg.patientid === user.id); // admin aligned like patient
 
                 return (
                   <div
