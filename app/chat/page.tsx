@@ -156,16 +156,17 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col md:flex-row h-screen gap-4 p-2 md:p-6">
       {/* User List */}
-      <div className="w-full md:w-1/4 md:overflow-y-auto flex md:flex-col gap-2 overflow-x-auto pb-2">
+      {/* User List */}
+      <div className="w-full md:w-1/4 md:overflow-y-auto flex md:flex-col gap-3 overflow-x-auto pb-2">
         {userList.map((u) => (
           <Card
             key={u.id}
-            className="p-3 cursor-pointer hover:shadow-md min-w-[150px] md:min-w-0"
+            className="p-4 cursor-pointer hover:shadow-md min-w-[220px] md:min-w-0"
             onClick={() => loadMessages(u)}
           >
-            <div className="flex items-center gap-3">
-              <Avatar />
-              <p className="text-sm md:text-base">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-10 w-10" />
+              <p className="text-base md:text-lg font-medium">
                 {u.role === "doctor" ? "Dr. " : ""}
                 {u.first_name} {u.last_name}
               </p>
