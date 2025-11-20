@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
+import UserBookings from "../components/bookings";
 
 interface Prescription {
   id: string;
@@ -163,6 +164,7 @@ export default function DashboardPage() {
           )}
         </CardContent>
       </Card>
+      <UserBookings />
     </div>
   );
 }
